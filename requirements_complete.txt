@@ -1,0 +1,33 @@
+# Unitree Go2 Web Interface - COMPLETE Dependencies
+# Python 3.12+ Compatible Version
+# Install with: pip install -r requirements_complete.txt
+
+# Core Web Framework
+Flask==3.0.3
+Flask-CORS==4.0.1
+
+# Computer Vision
+numpy>=1.26.0,<2.0.0
+opencv-python==4.10.0.84
+
+# WebRTC and Media Processing
+aiortc==1.9.0
+aiohttp==3.10.10
+av==13.1.0
+websockets==13.1
+
+# go2_webrtc_driver Dependencies
+requests>=2.31.0
+pycryptodome>=3.19.0
+pyaes>=1.6.1
+wasmtime>=14.0.0
+protobuf>=4.25.0
+pynacl>=1.5.0
+lz4>=4.3.2
+sounddevice>=0.4.6
+
+# Build Tools (Python 3.12+)
+setuptools>=70.0.0
+
+# Note: System dependencies must be installed separately via apt-get
+# See INSTALLATION_GUIDE.md for system dependency installation
