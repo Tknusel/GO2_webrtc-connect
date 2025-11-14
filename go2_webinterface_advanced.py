@@ -49,7 +49,7 @@ MAX_ANGULAR_SPEED = 1.5  # rad/s
 
 @app.route('/')
 def index():
-    return render_template('index_webinterface_advanced.html')
+    return render_template('index_webinterface_advanced2.html')
 
 @app.route('/connect', methods=['POST'])
 def connect():
@@ -262,12 +262,13 @@ def execute_command():
             'stop': 'StopMove',
             'hello': 'Hello',
             'stretch': 'Stretch',
-            'dance1': 'Dance1',
-            'dance2': 'Dance2',
             'wigglehips': 'WiggleHips',
             'fingerheart': 'FingerHeart',
+            'dance1': 'Dance1',
+            'dance2': 'Dance2',
             'frontflip': 'FrontFlip',
             'frontjump': 'FrontJump',
+            'wallow': 'Wallow',
             # Legacy mappings
             'dance': 'Dance1',
             'lie': 'Damp'
@@ -553,12 +554,13 @@ def execute_sequence():
                             'stop': 'StopMove',
                             'hello': 'Hello',
                             'stretch': 'Stretch',
-                            'dance1': 'Dance1',
-                            'dance2': 'Dance2',
                             'wigglehips': 'WiggleHips',
                             'fingerheart': 'FingerHeart',
+                            'dance1': 'Dance1',
+                            'dance2': 'Dance2',
                             'frontflip': 'FrontFlip',
                             'frontjump': 'FrontJump',
+                            'wallow': 'Wallow',
                             # Legacy mappings
                             'dance': 'Dance1'
                         }
