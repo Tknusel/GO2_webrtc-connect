@@ -2,6 +2,17 @@
 
 A comprehensive web-based control interface for the Unitree Go2 robot dog using WebRTC. Features real-time video streaming, virtual joystick controls, programmable movement sequences, and a full command library.
 
+## ⚠️ Important Firmware Compatibility Notice
+
+**This software is compatible with Unitree Go2 firmware version 1.1.8 and earlier ONLY.**
+
+Firmware versions 1.1.9 and later have changed the WebRTC connection protocol and are currently **NOT supported**.
+
+To check your firmware version:
+1. Connect to your Go2's WiFi
+2. Open the official Unitree Go app
+3. Check Settings > About for firmware version
+
 ## Features
 
 - 🎮 **Virtual Joystick Controls** - Intuitive dual-joystick interface for robot movement
@@ -16,6 +27,10 @@ A comprehensive web-based control interface for the Unitree Go2 robot dog using 
 ### Operating System
 - macOS (10.14 or later)
 - Linux (Ubuntu 20.04+ recommended)
+
+### Robot Requirements
+- **Unitree Go2 with firmware version 1.1.8 or earlier**
+- ⚠️ Firmware 1.1.9+ is NOT compatible
 
 ### Software Requirements
 - Python 3.9 or later (Python 3.12+ recommended)
@@ -241,6 +256,11 @@ GO2_webrtc-connect-main/
 ## Troubleshooting
 
 ### Connection Issues
+
+**Problem:** Firmware version incompatibility
+- **Solution:** Check firmware version - must be 1.1.8 or earlier
+- **Solution:** If firmware is 1.1.9+, you will need to downgrade
+- **Solution:** Contact Unitree support for firmware downgrade instructions
 
 **Problem:** Cannot connect to robot
 - **Solution:** Ensure Unitree Go app is completely closed
