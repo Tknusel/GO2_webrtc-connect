@@ -192,25 +192,25 @@
             <div class="commands-panel">
                 <h2>Robot Commands</h2>
                 <div style="margin-bottom: 15px;">
-                    <button class="btn-show-commands" id="btn-show-all-commands">📖 All Commands</button>
+                    <button class="btn-command" id="btn-stop" style="width: 100%;">⏹️ Stop Movement</button>
                 </div>
                 <h3 style="color: #00ff88; font-size: 14px; margin-bottom: 10px;">Basic Commands</h3>
                 <div class="command-grid">
                     <button class="btn-command" id="btn-stand">🏃 Stand</button>
                     <button class="btn-command" id="btn-sit">🪑 Sit</button>
                     <button class="btn-command" id="btn-damp">💤 Damp</button>
-                    <button class="btn-command" id="btn-stop">⏹️ Stop</button>
                     <button class="btn-command" id="btn-hello">👋 Hello</button>
                     <button class="btn-command" id="btn-stretch">🤸 Stretch</button>
+                    <button class="btn-command" id="btn-wigglehips">🍑 Wiggle</button>
+                    <button class="btn-command" id="btn-fingerheart">💗 Heart</button>
                 </div>
-                <h3 style="color: #ff9500; font-size: 14px; margin: 15px 0 10px 0;">⚠️ Requires Space (2-3m)</h3>
+                <h3 style="color: #ff9500; font-size: 14px; margin: 15px 0 10px 0;">⚠️ Advanced (Requires Space)</h3>
                 <div class="command-grid">
                     <button class="btn-command" id="btn-dance1">💃 Dance 1</button>
                     <button class="btn-command" id="btn-dance2">🕺 Dance 2</button>
-                    <button class="btn-command" id="btn-wigglehips">🍑 Wiggle</button>
-                    <button class="btn-command" id="btn-fingerheart">💗 Heart</button>
                     <button class="btn-command" id="btn-frontflip">🤸‍♂️ Front Flip</button>
                     <button class="btn-command" id="btn-frontjump">🏃‍♂️ Front Jump</button>
+                    <button class="btn-command" id="btn-wallow">🐊 Wallow</button>
                 </div>
             </div>
         </div>
@@ -301,13 +301,14 @@ const SPORT_COMMANDS = {
     'damp': 1001,
     'hello': 1016,
     'stretch': 1017,
-    // Commands requiring space
-    'dance1': 1022,
-    'dance2': 1023,
     'wigglehips': 1033,
     'fingerheart': 1036,
+    // Advanced commands (require space)
+    'dance1': 1022,
+    'dance2': 1023,
     'frontflip': 1030,
-    'frontjump': 1031
+    'frontjump': 1031,
+    'wallow': 1021
 };
 
 // Initialize joysticks IMMEDIATELY on DOM load (no setTimeout!)
@@ -643,8 +644,8 @@ function populateCommandList() {
     commandList.innerHTML = '';
     
     // Organize commands by category
-    const basicCommands = ['stop', 'stand', 'sit', 'damp', 'hello', 'stretch'];
-    const spaceCommands = ['dance1', 'dance2', 'wigglehips', 'fingerheart', 'frontflip', 'frontjump'];
+    const basicCommands = ['stop', 'stand', 'sit', 'damp', 'hello', 'stretch', 'wigglehips', 'fingerheart'];
+    const advancedCommands = ['dance1', 'dance2', 'frontflip', 'frontjump', 'wallow'];
     
     // Add basic commands section
     const basicHeader = document.createElement('div');
@@ -674,13 +675,13 @@ function populateCommandList() {
         commandList.appendChild(commandItem);
     });
     
-    // Add space-requiring commands section
-    const spaceHeader = document.createElement('div');
-    spaceHeader.style.gridColumn = '1 / -1';
-    spaceHeader.innerHTML = '<h3 style="color: #ff9500; margin: 20px 0 10px 0;">⚠️ Requires Space (2-3m)</h3>';
-    commandList.appendChild(spaceHeader);
+    // Add advanced commands section
+    const advancedHeader = document.createElement('div');
+    advancedHeader.style.gridColumn = '1 / -1';
+    advancedHeader.innerHTML = '<h3 style="color: #ff9500; margin: 20px 0 10px 0;">⚠️ Advanced (Requires Space)</h3>';
+    commandList.appendChild(advancedHeader);
     
-    spaceCommands.forEach(name => {
+    advancedCommands.forEach(name => {
         const code = SPORT_COMMANDS[name];
         const commandItem = document.createElement('div');
         commandItem.className = 'command-item';
@@ -728,14 +729,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-stop').addEventListener('click', () => sendCommand('stop'));
     document.getElementById('btn-hello').addEventListener('click', () => sendCommand('hello'));
     document.getElementById('btn-stretch').addEventListener('click', () => sendCommand('stretch'));
-    
-    // Commands requiring space
-    document.getElementById('btn-dance1').addEventListener('click', () => sendCommand('dance1'));
-    document.getElementById('btn-dance2').addEventListener('click', () => sendCommand('dance2'));
     document.getElementById('btn-wigglehips').addEventListener('click', () => sendCommand('wigglehips'));
     document.getElementById('btn-fingerheart').addEventListener('click', () => sendCommand('fingerheart'));
+    
+    // Advanced commands (require space)
+    document.getElementById('btn-dance1').addEventListener('click', () => sendCommand('dance1'));
+    document.getElementById('btn-dance2').addEventListener('click', () => sendCommand('dance2'));
     document.getElementById('btn-frontflip').addEventListener('click', () => sendCommand('frontflip'));
     document.getElementById('btn-frontjump').addEventListener('click', () => sendCommand('frontjump'));
+    document.getElementById('btn-wallow').addEventListener('click', () => sendCommand('wallow'));
     
     // Sequence buttons
     document.getElementById('btnRunSequence').addEventListener('click', runSequence);
