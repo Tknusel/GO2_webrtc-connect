@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unitree Go2 Control - Enhanced</title>
+    <script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; color: #00ff88; }
+        h2 { margin-bottom: 15px; }
+        .connection-panel, .commands-panel, .joystick-panel, .sequence-panel { background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .control-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #aaa; font-size: 14px; }
+        input[type="text"], textarea { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 14px; }
+        textarea { font-family: 'Courier New', monospace; resize: vertical; min-height: 150px; }
+        .button-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: all 0.3s; font-weight: bold; }
+        .btn-connect { flex: 1; background: #0066ff; color: white; }
+        .btn-connect:hover { background: #0052cc; }
+        .btn-disconnect { flex: 1; background: #ff3333; color: white; }
+        .btn-disconnect:hover { background: #cc0000; }
+        .btn-command { background: #00ff88; color: #1a1a1a; }
+        .btn-command:hover { background: #00cc6a; }
+        .btn-command:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .btn-sequence { background: #ff9500; color: white; }
+        .btn-sequence:hover { background: #cc7700; }
+        .btn-stop-sequence { background: #ff3333; color: white; font-weight: bold; border: 2px solid #ff0000; }
+        .btn-stop-sequence:hover { background: #cc0000; transform: scale(1.05); }
+        .video-container { background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 20px; position: relative; padding-top: 56.25%; }
+        .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        .status { padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; text-align: center; }
+        .status.connected { background: #00ff8820; color: #00ff88; border: 1px solid #00ff88; }
+        .status.disconnected { background: #ff333320; color: #ff3333; border: 1px solid #ff3333; }
+        .control-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        @media (max-width: 1024px) { .control-panels { grid-template-columns: 1fr; } }
+        .command-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
+        .joystick-container { display: flex; justify-content: space-around; align-items: center; margin-top: 20px; gap: 20px; }
+        .joystick-wrapper { text-align: center; }
+        .joystick-zone { 
+            width: 200px; 
+            height: 200px; 
+            background: #1a1a1a;
+            border-radius: 50%;
+            border: 2px solid #444;
+            position: relative;
+        }
+        .joystick-label { margin-top: 10px; color: #00ff88; font-weight: bold; }
+        .joystick-values { margin-top: 5px; font-family: 'Courier New', monospace; font-size: 12px; color: #aaa; }
+        .log { background: #1a1a1a; padding: 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 200px; overflow-y: auto; border: 1px solid #444; }
+        .log-entry { margin-bottom: 5px; color: #0ff; }
+        .log-error { color: #f33; }
+        .log-success { color: #0f0; }
+        .info-box { background: #2a2a2a; padding: 15px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #00ff88; }
+        .info-box h3 { color: #00ff88; margin-bottom: 10px; }
+        .info-box ul { color: #aaa; line-height: 1.8; padding-left: 20px; }
+        .sequence-examples { background: #1a1a1a; padding: 15px; border-radius: 5px; margin-top: 15px; }
+        .sequence-examples h4 { color: #ff9500; margin-bottom: 10px; }
+        .sequence-examples pre { color: #aaa; font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre-wrap; }
+        .warning-box { background: #ff990020; border: 2px solid #ff9900; border-radius: 5px; padding: 12px; margin-top: 10px; }
+        .warning-box strong { color: #ff9900; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Unitree Go2 Control</h1>
+        
+        <div id="status" class="status disconnected">⚠️ Not Connected</div>
+        
+        <div class="connection-panel">
+            <h2>Connection Settings</h2>
+            <div class="control-group">
+                <label for="robotIp">Robot IP Address:</label>
+                <input type="text" id="robotIp" value="192.168.12.1">
+            </div>
+            <div class="button-group">
+                <button class="btn-connect" id="btnConnect">🔌 Connect</button>
+                <button class="btn-disconnect" id="btnDisconnect">⛔ Disconnect</button>
+            </div>
+        </div>
+        
+        <div class="video-container">
+            <img id="videoFeed" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect fill='%23000'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23666'%3ENo Video%3C/text%3E%3C/svg%3E">
+        </div>
+        
+        <div class="control-panels">
+            <div class="joystick-panel">
+                <h2>🕹️ Joystick Controls</h2>
+                <div class="joystick-container">
+                    <div class="joystick-wrapper">
+                        <div id="joystick-left" class="joystick-zone"></div>
+                        <div class="joystick-label">Movement</div>
+                        <div class="joystick-values" id="left-values">X: 0.00 | Y: 0.00</div>
+                    </div>
+                    <div class="joystick-wrapper">
+                        <div id="joystick-right" class="joystick-zone"></div>
+                        <div class="joystick-label">Rotation</div>
+                        <div class="joystick-values" id="right-values">Z: 0.00</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: #33333380; border-radius: 5px; border-left: 3px solid #ff9500; font-size: 12px; color: #aaa;">
+                    <strong style="color: #ff9500;">💡 Tip:</strong> If joysticks glitch or jump, clear your browser cache (<code>Ctrl+Shift+Delete</code>) and reload the page (<code>Ctrl+Shift+R</code>).
+                </div>
+            </div>
+            
+            <div class="commands-panel">
+                <h2>Robot Commands</h2>
+                <div class="command-grid">
+                    <button class="btn-command" id="btn-stand">🏃 Stand</button>
+                    <button class="btn-command" id="btn-sit">🪑 Sit</button>
+                    <button class="btn-command" id="btn-damp">💤 Damp</button>
+                    <button class="btn-command" id="btn-hello">👋 Hello</button>
+                    <button class="btn-command" id="btn-stop">⏹️ Stop</button>
+                    <button class="btn-command" id="btn-dance">💃 Dance</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sequence-panel">
+            <h2>📝 Sequence Builder</h2>
+            <div class="warning-box">
+                <strong>⚠️ IMPORTANT:</strong> Always include <code>{ action: 'command', command: 'stop', duration: 0.5 }</code> before movement commands to activate movement mode!
+            </div>
+            <div class="control-group">
+                <label>Movement Sequence Code:</label>
+                <textarea id="sequenceCode">const sequence = [
+  { action: 'command', command: 'stop', duration: 0.5 },
+  { action: 'wait', duration: 1 },
+  { action: 'move', vx: 0.2, vy: 0, vz: 0, duration: 3 },
+  { action: 'move', vx: 0, vy: 0, vz: 0.6, duration: 2.5 },
+  { action: 'command', command: 'sit', duration: 2 }
+];
+executeSequence(sequence);</textarea>
+            </div>
+            <div class="button-group">
+                <button class="btn-sequence" id="btnRunSequence">▶️ Run</button>
+                <button class="btn-stop-sequence" id="btnStopSequence">⛔ STOP</button>
+                <button class="btn-command" id="btnSquare">📦 Square</button>
+                <button class="btn-command" id="btnCircle">⭕ Circle</button>
+                <button class="btn-command" id="btnDance">💃 Dance</button>
+            </div>
+            <div class="sequence-examples">
+                <h4>📖 API Reference</h4>
+                <pre>Movement: { action: 'move', vx: 0.2, vy: 0, vz: 0.6, duration: 3 }
+Command:  { action: 'command', command: 'stand', duration: 2 }
+Wait:     { action: 'wait', duration: 1 }
+
+⚠️ CRITICAL: Use 'stop' command before moves to activate movement mode!
+Example:  { action: 'command', command: 'stop', duration: 0.5 }
+
+Available commands: 'stop', 'stand', 'sit', 'damp', 'hello', 'dance'
+Safe speeds: vx/vy: -0.3 to 0.3 m/s, vz: -0.8 to 0.8 rad/s</pre>
+            </div>
+        </div>
+        
+        <div class="log" id="log">
+            <div class="log-entry">System ready</div>
+        </div>
+        
+        <div class="info-box">
+            <h3>⚠️ Important</h3>
+            <ul>
+                <li>Close Unitree Go app before connecting</li>
+                <li>Always use 'stop' command before movement sequences</li>
+                <li>Commands like 'stand', 'sit', 'hello' deactivate movement mode</li>
+                <li>Use 'stop' command after these to re-enable movement</li>
+                <li>Start with low speeds for safety</li>
+            </ul>
+        </div>
+    </div>
+
+<script>
+// EXACT copy of old working file structure + fixed coordinates
+let connected = false;
+let leftJoystick = null;
+let rightJoystick = null;
+let movementInterval = null;
+let currentMovement = { vx: 0, vy: 0, vz: 0 };
+let sequenceRunning = false;
+let lastCommandTime = 0;
+
+// Initialize joysticks IMMEDIATELY on DOM load (no setTimeout!)
+function initJoysticks() {
+    if (typeof nipplejs === 'undefined') {
+        console.error('NippleJS library not loaded! Check CDN connection.');
+        addLog('⚠️ Joystick library failed to load. Check internet connection.', 'error');
+        return;
+    }
+    
+    try {
+        leftJoystick = nipplejs.create({
+            zone: document.getElementById('joystick-left'),
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: '#00ff88',
+            size: 150
+        });
+        
+        rightJoystick = nipplejs.create({
+            zone: document.getElementById('joystick-right'),
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: '#ff9500',
+            size: 150
+        });
+        
+        console.log('Joysticks initialized successfully');
+        addLog('✓ Joysticks initialized', 'success');
+    } catch (error) {
+        console.error('Error initializing joysticks:', error);
+        addLog('✗ Failed to initialize joysticks: ' + error.message, 'error');
+        return;
+    }
+    
+    // LEFT JOYSTICK with FIXED coordinates
+    leftJoystick.on('move', function(evt, data) {
+        if (!connected) return;
+        
+        const angle = data.angle.radian;
+        const force = Math.min(data.force, 2) / 2;
+        
+        // FIXED mapping
+        const vx = Math.sin(angle) * force;
+        const vy = -Math.cos(angle) * force;
+        
+        currentMovement.vx = vx;
+        currentMovement.vy = vy;
+        
+        document.getElementById('left-values').textContent = 
+            `X: ${vx.toFixed(2)} | Y: ${vy.toFixed(2)}`;
+    });
+    
+    leftJoystick.on('end', function() {
+        currentMovement.vx = 0;
+        currentMovement.vy = 0;
+        document.getElementById('left-values').textContent = 'X: 0.00 | Y: 0.00';
+        if (connected) sendMovement();
+    });
+    
+    // RIGHT JOYSTICK with FIXED coordinates
+    rightJoystick.on('move', function(evt, data) {
+        if (!connected) return;
+        
+        const angle = data.angle.radian;
+        const force = Math.min(data.force, 2) / 2;
+        
+        // FIXED mapping
+        const vz = -Math.cos(angle) * force * 1.5;
+        
+        currentMovement.vz = vz;
+        
+        document.getElementById('right-values').textContent = 
+            `Z: ${vz.toFixed(2)}`;
+    });
+    
+    rightJoystick.on('end', function() {
+        currentMovement.vz = 0;
+        document.getElementById('right-values').textContent = 'Z: 0.00';
+        if (connected) sendMovement();
+    });
+}
+
+function startMovementLoop() {
+    if (movementInterval) return;
+    
+    movementInterval = setInterval(() => {
+        if (connected) {
+            sendMovement();
+        }
+    }, 100);
+}
+
+function stopMovementLoop() {
+    if (movementInterval) {
+        clearInterval(movementInterval);
+        movementInterval = null;
+    }
+}
+
+async function sendMovement() {
+    try {
+        await fetch('/update_velocity', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(currentMovement)
+        });
+    } catch (error) {
+        console.error('Movement send error:', error);
+    }
+}
+
+function addLog(msg, type = 'info') {
+    const log = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
+}
+
+function updateCommandButtons(enabled) {
+    document.querySelectorAll('.btn-command').forEach(btn => btn.disabled = !enabled);
+}
+
+async function connect() {
+    const ip = document.getElementById('robotIp').value;
+    addLog('Connecting to ' + ip + '...', 'info');
+    
+    try {
+        const response = await fetch('/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ip})
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            connected = true;
+            document.getElementById('status').className = 'status connected';
+            document.getElementById('status').textContent = '✓ Connected to Robot';
+            updateCommandButtons(true);
+            startMovementLoop();
+            addLog('✓ Connected successfully!', 'success');
+            addLog('✓ Video stream starting...', 'success');
+            addLog('✓ Joysticks ready for use', 'success');
+            
+            document.getElementById('videoFeed').src = '/video_feed?' + Date.now();
+        } else {
+            addLog('✗ Connection failed: ' + data.message, 'error');
+        }
+    } catch (error) {
+        addLog('✗ Connection error: ' + error.message, 'error');
+    }
+}
+
+async function disconnect() {
+    addLog('Disconnecting...', 'info');
+    
+    try {
+        stopMovementLoop();
+        currentMovement = { vx: 0, vy: 0, vz: 0 };
+        
+        const response = await fetch('/disconnect', {method: 'POST'});
+        const data = await response.json();
+        
+        connected = false;
+        document.getElementById('status').className = 'status disconnected';
+        document.getElementById('status').textContent = '⚠️ Not Connected';
+        updateCommandButtons(false);
+        addLog('Disconnected from robot', 'info');
+        
+        document.getElementById('videoFeed').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1280' height='720'%3E%3Crect width='1280' height='720' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='%23666'%3ENo Video%3C/text%3E%3C/svg%3E";
+    } catch (error) {
+        addLog('✗ Disconnect error: ' + error.message, 'error');
+    }
+}
+
+async function sendCommand(command) {
+    if (!connected) {
+        addLog('✗ Not connected! Connect to robot first.', 'error');
+        return;
+    }
+    
+    const now = Date.now();
+    if (lastCommandTime && now - lastCommandTime < 500) {
+        addLog('⚠️ Please wait 0.5s between commands', 'error');
+        return;
+    }
+    lastCommandTime = now;
+    
+    addLog(`Sending command: ${command}`, 'info');
+    
+    try {
+        const response = await fetch('/command', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({command})
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            addLog(`✓ Command '${command}' sent successfully`, 'success');
+        } else {
+            addLog(`✗ Command failed: ${data.message}`, 'error');
+        }
+    } catch (error) {
+        addLog(`✗ Command error: ${error.message}`, 'error');
+    }
+}
+
+async function executeSequence(sequence) {
+    if (!connected) {
+        addLog('✗ Not connected', 'error');
+        return;
+    }
+    if (sequenceRunning) {
+        addLog('⚠️ Sequence already running', 'error');
+        return;
+    }
+    
+    stopMovementLoop();
+    sequenceRunning = true;
+    addLog(`Starting sequence (${sequence.length} steps)`, 'info');
+    
+    try {
+        const response = await fetch('/sequence/execute', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({sequence})
+        });
+        const data = await response.json();
+        if (response.ok) {
+            addLog(`✓ Sequence started`, 'success');
+            const checkInterval = setInterval(async () => {
+                try {
+                    const statusResp = await fetch('/sequence/status');
+                    const statusData = await statusResp.json();
+                    if (!statusData.running) {
+                        clearInterval(checkInterval);
+                        sequenceRunning = false;
+                        addLog('✓ Sequence complete', 'success');
+                        setTimeout(() => startMovementLoop(), 500);
+                    }
+                } catch (e) {}
+            }, 500);
+        } else {
+            sequenceRunning = false;
+            addLog(`✗ Failed: ${data.message}`, 'error');
+            startMovementLoop();
+        }
+    } catch (error) {
+        sequenceRunning = false;
+        addLog(`✗ Error: ${error.message}`, 'error');
+        startMovementLoop();
+    }
+}
+
+function stopSequence() {
+    if (!sequenceRunning) return;
+    addLog('⛔ Stopping...', 'info');
+    fetch('/sequence/stop', {method: 'POST'});
+}
+
+function runSequence() {
+    try {
+        eval(document.getElementById('sequenceCode').value);
+    } catch (error) {
+        addLog(`✗ Code error: ${error.message}`, 'error');
+    }
+}
+
+function loadSquare() {
+    document.getElementById('sequenceCode').value = `const sequence = [
+  { action: 'command', command: 'stop', duration: 0.5 },
+  { action: 'wait', duration: 1 },
+  { action: 'move', vx: 0.2, vy: 0, vz: 0, duration: 3 },
+  { action: 'move', vx: 0, vy: 0, vz: 0.65, duration: 3 },
+  { action: 'move', vx: 0.2, vy: 0, vz: 0, duration: 3 },
+  { action: 'move', vx: 0, vy: 0, vz: 0.65, duration: 3 },
+  { action: 'move', vx: 0.2, vy: 0, vz: 0, duration: 3 },
+  { action: 'move', vx: 0, vy: 0, vz: 0.65, duration: 3 },
+  { action: 'move', vx: 0.2, vy: 0, vz: 0, duration: 3 },
+  { action: 'move', vx: 0, vy: 0, vz: 0.65, duration: 3 },
+  { action: 'command', command: 'sit', duration: 2 }
+];
+executeSequence(sequence);`;
+    addLog('Loaded square example', 'success');
+}
+
+function loadCircle() {
+    document.getElementById('sequenceCode').value = `const sequence = [
+  { action: 'command', command: 'stop', duration: 0.5 },
+  { action: 'wait', duration: 1 },
+  { action: 'move', vx: 0.165, vy: 0, vz: 0.44, duration: 18.5 },
+  { action: 'command', command: 'sit', duration: 2 }
+];
+executeSequence(sequence);`;
+    addLog('Loaded circle example', 'success');
+}
+
+function loadDanceRoutine() {
+    document.getElementById('sequenceCode').value = `const sequence = [
+  { action: 'command', command: 'stand', duration: 2 },
+  { action: 'wait', duration: 1 },
+  { action: 'command', command: 'hello', duration: 3 },
+  { action: 'wait', duration: 1 },
+  { action: 'command', command: 'dance', duration: 8 },
+  { action: 'wait', duration: 1 },
+  { action: 'command', command: 'sit', duration: 2 }
+];
+executeSequence(sequence);`;
+    addLog('Loaded dance routine example', 'success');
+}
+
+// CRITICAL: Call initJoysticks immediately when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initJoysticks();  // Initialize joysticks FIRST
+    
+    // Then attach button handlers
+    document.getElementById('btnConnect').addEventListener('click', connect);
+    document.getElementById('btnDisconnect').addEventListener('click', disconnect);
+    document.getElementById('btn-stand').addEventListener('click', () => sendCommand('stand'));
+    document.getElementById('btn-sit').addEventListener('click', () => sendCommand('sit'));
+    document.getElementById('btn-damp').addEventListener('click', () => sendCommand('damp'));
+    document.getElementById('btn-hello').addEventListener('click', () => sendCommand('hello'));
+    document.getElementById('btn-stop').addEventListener('click', () => sendCommand('stop'));
+    document.getElementById('btn-dance').addEventListener('click', () => sendCommand('dance'));
+    document.getElementById('btnRunSequence').addEventListener('click', runSequence);
+    document.getElementById('btnStopSequence').addEventListener('click', stopSequence);
+    document.getElementById('btnSquare').addEventListener('click', () => loadSquare());
+    document.getElementById('btnCircle').addEventListener('click', () => loadCircle());
+    document.getElementById('btnDance').addEventListener('click', () => loadDanceRoutine());
+    
+    addLog('✓ System ready', 'success');
+});
+</script>
+</body>
+</html>
