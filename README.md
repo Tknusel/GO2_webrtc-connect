@@ -139,11 +139,9 @@ You should see a list of available sport commands and RTC topics.
 
 1. **Power on the Unitree Go2 robot**
 2. **Connect to the robot's WiFi network**
-   - Default SSID: `Unitree_Go2XXXXXXX`
-   - Default password: (check your robot's manual or WiFi sticker)
 3. **Note the robot's IP address**
    - Default: `192.168.12.1`
-   - If different, update in the Python files
+   - If different, update in the Python files or afterwards in the webinterface
 
 ### Test Connection
 
@@ -178,7 +176,7 @@ The server will start on `http://localhost:5000`
 ### Accessing the Interface
 
 1. Open your web browser
-2. Navigate to `http://localhost:5000`
+2. Navigate to `http://127.0.0.1:5000`
 3. **Important:** Close the official Unitree Go app if running
 4. Click "Connect" button
 5. Wait for connection (10-30 seconds)
@@ -245,7 +243,7 @@ GO2_webrtc-connect-main/
 ├── go2_webinterface_advanced.py          # Advanced web interface
 ├── connection_test.py                     # Connection diagnostic tool
 ├── show_commands.py                       # Display available commands
-├── COMMAND_REFERENCE.md                   # Complete command documentation
+├── COMMAND_REFERENCE.md                   # Complete command documentation (not all are able to be performed with this setup)
 ├── SETUP_INSTRUCTIONS.md                  # Original setup guide
 ├── Commands.md                            # Command ID reference
 └── templates/
@@ -259,7 +257,7 @@ GO2_webrtc-connect-main/
 
 **Problem:** Firmware version incompatibility
 - **Solution:** Check firmware version - must be 1.1.8 or earlier
-- **Solution:** If firmware is 1.1.9+, you will need to downgrade
+- **Solution:** If firmware is 1.1.9+, you will need to downgrade 
 - **Solution:** Contact Unitree support for firmware downgrade instructions
 
 **Problem:** Cannot connect to robot
@@ -323,6 +321,7 @@ Contributions are welcome! Please:
 ## Credits
 
 - Original WebRTC driver: [legion1581/unitree_webrtc_connect](https://github.com/legion1581/unitree_webrtc_connect)
+- Original Webinterface: [tfoldi/go2-webrtc](https://github.com/tfoldi/go2-webrtc))
 - Unitree Robotics for the Go2 platform
 - nipplejs for virtual joystick controls
 
