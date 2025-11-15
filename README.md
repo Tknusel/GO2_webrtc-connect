@@ -6,7 +6,7 @@ A comprehensive web-based control interface for the Unitree Go2 robot dog using 
 
 **This software is compatible with Unitree Go2 firmware version 1.1.8 and earlier ONLY.**
 
-Firmware versions 1.1.9 and later have changed the WebRTC connection protocol and are currently **NOT supported**.
+Firmware versions 1.1.9 and later have changed the sport_mode support and are currently **NOT supported**.
 
 To check your firmware version:
 1. Connect to your Go2's WiFi
