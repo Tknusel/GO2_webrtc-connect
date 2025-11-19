@@ -49,7 +49,7 @@ MAX_ANGULAR_SPEED = 1.5  # rad/s
 
 @app.route('/')
 def index():
-    return render_template('index_enhanced_advanced2.html')
+    return render_template('index_webinterface_advanced.html')
 
 @app.route('/connect', methods=['POST'])
 def connect():
