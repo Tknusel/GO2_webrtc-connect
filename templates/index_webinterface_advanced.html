@@ -61,90 +61,6 @@
         .sequence-examples pre { color: #aaa; font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre-wrap; }
         .warning-box { background: #ff990020; border: 2px solid #ff9900; border-radius: 5px; padding: 12px; margin-top: 10px; }
         .warning-box strong { color: #ff9900; }
-        
-        /* Command Popup Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            overflow: auto;
-        }
-        .modal-content {
-            background-color: #2a2a2a;
-            margin: 2% auto;
-            padding: 30px;
-            border: 2px solid #00ff88;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 1000px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #00ff88;
-        }
-        .modal-header h2 {
-            color: #00ff88;
-            margin: 0;
-        }
-        .close-modal {
-            color: #ff3333;
-            font-size: 35px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s;
-            line-height: 1;
-        }
-        .close-modal:hover {
-            color: #ff6666;
-        }
-        .command-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .command-item {
-            background: #1a1a1a;
-            padding: 12px 15px;
-            border-radius: 5px;
-            border-left: 3px solid #00ff88;
-            font-family: 'Courier New', monospace;
-            transition: all 0.3s;
-        }
-        .command-item:hover {
-            background: #333;
-            border-left-color: #ff9500;
-            transform: translateX(5px);
-        }
-        .command-name {
-            color: #00ff88;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .command-code {
-            color: #aaa;
-            font-size: 12px;
-            margin-top: 3px;
-        }
-        .btn-show-commands {
-            background: #9500ff;
-            color: white;
-        }
-        .btn-show-commands:hover {
-            background: #7700cc;
-        }
     </style>
 </head>
 <body>
@@ -265,20 +181,6 @@ Safe speeds: vx/vy: -0.3 to 0.3 m/s, vz: -0.8 to 0.8 rad/s</pre>
                 <li>Use 'stop' command after these to re-enable movement</li>
                 <li>Start with low speeds for safety</li>
             </ul>
-        </div>
-    </div>
-
-    <!-- Command List Modal -->
-    <div id="commandModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🤖 Robot Commands</h2>
-                <span class="close-modal" id="closeModal">&times;</span>
-            </div>
-            <p style="color: #aaa; margin-bottom: 20px;">Click any command to execute it (when connected)</p>
-            <div class="command-list" id="commandList">
-                <!-- Commands will be populated by JavaScript -->
-            </div>
         </div>
     </div>
 
@@ -629,91 +531,6 @@ executeSequence(sequence);`;
     addLog('Loaded dance routine example', 'success');
 }
 
-// Modal functions
-function showCommandModal() {
-    document.getElementById('commandModal').style.display = 'block';
-    addLog('Opened command list', 'info');
-}
-
-function closeCommandModal() {
-    document.getElementById('commandModal').style.display = 'none';
-}
-
-function populateCommandList() {
-    const commandList = document.getElementById('commandList');
-    commandList.innerHTML = '';
-    
-    // Organize commands by category
-    const basicCommands = ['stop', 'stand', 'sit', 'damp', 'hello', 'stretch', 'wigglehips', 'fingerheart'];
-    const advancedCommands = ['dance1', 'dance2', 'frontflip', 'frontjump', 'wallow'];
-    
-    // Add basic commands section
-    const basicHeader = document.createElement('div');
-    basicHeader.style.gridColumn = '1 / -1';
-    basicHeader.innerHTML = '<h3 style="color: #00ff88; margin: 10px 0;">Basic Commands</h3>';
-    commandList.appendChild(basicHeader);
-    
-    basicCommands.forEach(name => {
-        const code = SPORT_COMMANDS[name];
-        const commandItem = document.createElement('div');
-        commandItem.className = 'command-item';
-        commandItem.style.cursor = 'pointer';
-        commandItem.innerHTML = `
-            <div class="command-name">${formatCommandName(name)}</div>
-            <div class="command-code">Code: ${code}</div>
-        `;
-        
-        commandItem.addEventListener('click', () => {
-            if (connected) {
-                sendCommand(name);
-                closeCommandModal();
-            } else {
-                addLog('✗ Not connected! Connect to robot first.', 'error');
-            }
-        });
-        
-        commandList.appendChild(commandItem);
-    });
-    
-    // Add advanced commands section
-    const advancedHeader = document.createElement('div');
-    advancedHeader.style.gridColumn = '1 / -1';
-    advancedHeader.innerHTML = '<h3 style="color: #ff9500; margin: 20px 0 10px 0;">⚠️ Advanced (Requires Space)</h3>';
-    commandList.appendChild(advancedHeader);
-    
-    advancedCommands.forEach(name => {
-        const code = SPORT_COMMANDS[name];
-        const commandItem = document.createElement('div');
-        commandItem.className = 'command-item';
-        commandItem.style.cursor = 'pointer';
-        commandItem.style.borderLeftColor = '#ff9500';
-        commandItem.innerHTML = `
-            <div class="command-name">${formatCommandName(name)}</div>
-            <div class="command-code">Code: ${code}</div>
-        `;
-        
-        commandItem.addEventListener('click', () => {
-            if (connected) {
-                sendCommand(name);
-                closeCommandModal();
-            } else {
-                addLog('✗ Not connected! Connect to robot first.', 'error');
-            }
-        });
-        
-        commandList.appendChild(commandItem);
-    });
-}
-
-function formatCommandName(name) {
-    // Convert camelCase or lowercase to Title Case
-    return name
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/^./, str => str.toUpperCase())
-        .trim();
-}
-
-
 // CRITICAL: Call initJoysticks immediately when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     initJoysticks();  // Initialize joysticks FIRST
@@ -745,21 +562,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnSquare').addEventListener('click', () => loadSquare());
     document.getElementById('btnCircle').addEventListener('click', () => loadCircle());
     document.getElementById('btnDance').addEventListener('click', () => loadDanceRoutine());
-    
-    // Command modal
-    document.getElementById('btn-show-all-commands').addEventListener('click', showCommandModal);
-    document.getElementById('closeModal').addEventListener('click', closeCommandModal);
-    
-    // Close modal when clicking outside of it
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('commandModal');
-        if (event.target == modal) {
-            closeCommandModal();
-        }
-    });
-    
-    // Populate command list in modal
-    populateCommandList();
     
     addLog('✓ System ready', 'success');
 });
